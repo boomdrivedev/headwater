@@ -1,20 +1,51 @@
 $schema: 'https://moonrepo.dev/schemas/project.json'
 
-# The site, published to https://agentplot.github.io/headwater by
-# .github/workflows/pages.yml. bun comes from the devenv shell.
+# The site, Astro with Starlight, published to
+# https://boomdrivedev.github.io/headwater by .github/workflows/pages.yml. bun
+# and Biome come from the devenv shell. Each check is one task, in the fast
+# layer: its sources' format and lint by Biome, by the settings in
+# /biome.json; its types, the .astro components' among them, by astro
+# check; and its build, which fails on a broken internal link. No task
+# reads its pages for their words, which their writers keep
+# (boomdrivedev/blueprints principle 16; record 0001).
 language: 'typescript'
 layer: 'application'
 
 tasks:
-  # The pinned dependencies, from bun.lock. It reaches the registry, so it
-  # is never replayed.
-  install:
-    command: 'bun install --frozen-lockfile'
-    inputs: ['package.json', 'bun.lock']
-    options: {cache: false}
-  build:
-    command: 'bun run build'
+  format:
+    command: 'biome format .'
+    inputs: ['**/*', '!node_modules/**/*', '!dist/**/*', '!.astro/**/*', '/biome.json', '/devenv.nix', '/devenv.lock']
+    tags: [check-fast]
+  lint:
+    command: 'biome lint .'
+    inputs: ['**/*', '!node_modules/**/*', '!dist/**/*', '!.astro/**/*', '/biome.json', '/devenv.nix', '/devenv.lock']
+    tags: [check-fast]
+  # astro's bin starts `#!/usr/bin/env node`, and the devenv holds no node,
+  # so bun runs astro's bin itself. astro keeps its telemetry setting in the
+  # user's home: with telemetry off it reads nothing there. typecheck and
+  # build both write .astro/, so they share the mutex astro and never run
+  # at once.
+  typecheck:
+    command: 'bun ./node_modules/astro/bin/astro.mjs check'
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+    inputs: ['src/**/*', 'scripts/**/*', 'astro.config.mjs', 'package.json', 'bun.lock', 'tsconfig.json', '/devenv.nix', '/devenv.lock', '/.prototools']
     deps: ['~:install']
+    tags: [check-fast]
+    options: {mutex: 'astro'}
+  build:
+    command: 'bun ./node_modules/astro/bin/astro.mjs build'
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
     inputs: ['src/**/*', 'public/**/*', 'astro.config.mjs', 'package.json', 'bun.lock', 'tsconfig.json', '/devenv.nix', '/devenv.lock', '/.prototools']
     outputs: ['dist']
+    deps: ['~:install']
     tags: [check-fast]
+    options: {mutex: 'astro'}
+  # No layer: it checks nothing, and the tasks that need the packages run
+  # it first. It installs bun.lock's packages and reaches the registry, so
+  # it is never replayed.
+  install:
+    command: 'bun install --frozen-lockfile'
+    inputs: ['package.json', 'bun.lock', '/devenv.nix', '/devenv.lock']
+    options: {cache: false}

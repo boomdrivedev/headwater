@@ -1,0 +1,13 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# The workspace as a whole: what spans the tree, each check one task.
+tasks:
+  # Every formatter treefmt.nix configures, writing nothing it would change
+  # and keeping no cache outside the tree. It reads every tracked file: one
+  # that no formatter claims and no exclude names fails it. It excludes
+  # *.md and *.mdx by name and reads none (record 0001).
+  format:
+    command: 'treefmt --ci'
+    inputs: ['/**/*', '/devenv.nix', '/devenv.lock']
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true}

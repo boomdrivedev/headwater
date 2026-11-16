@@ -18,7 +18,8 @@ let
           aarch64-linux = "aarch64-unknown-linux-musl";
           x86_64-linux = "x86_64-unknown-linux-musl";
         }
-        .${pkgs.stdenv.hostPlatform.system} or (throw "proto ${version}: no release build for ${pkgs.stdenv.hostPlatform.system}");
+        .${pkgs.stdenv.hostPlatform.system}
+          or (throw "proto ${version}: no release build for ${pkgs.stdenv.hostPlatform.system}");
       hashes = {
         aarch64-apple-darwin = "8bfde4c862381eeb6e82d0858bb6215732cbd1e384e4eae45da8fa08095e0ffd";
         x86_64-apple-darwin = "aaaff78c7125de1b765f00177f35da75ee16fb1363e07632ace27213ff5d893b";
@@ -61,9 +62,12 @@ in
     pkgs.git
     pkgs.jq
     proto
-    # The site (site/): bun builds it, and Playwright drives the headless
-    # Chromium its screenshots are taken in (site/scripts/shots.mjs).
+    # The site (site/): bun builds it, Biome formats and lints its sources
+    # (site:format, site:lint, and treefmt for root:format), and Playwright
+    # drives the headless Chromium its screenshots are taken in
+    # (site/scripts/shots.mjs).
     pkgs.bun
+    pkgs.biome
     pkgs.playwright-test
   ];
 
@@ -99,6 +103,13 @@ in
       ${proto}/bin/proto install --config-mode upwards
     '';
     before = [ "devenv:enterShell" ];
+  };
+
+  # Every formatter treefmt.nix configures, which root:format checks.
+  treefmt.enable = true;
+  treefmt.config = {
+    imports = [ ./treefmt.nix ];
+    projectRootFile = "devenv.nix";
   };
 
   # convco refuses a commit message that is not a conventional commit
