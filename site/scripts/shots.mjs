@@ -4,38 +4,55 @@
 // inside the devenv shell, whose PLAYWRIGHT_BROWSERS_PATH holds Chromium:
 //
 //   devenv shell -- bun run shots <out-dir> [page ...]
-import { createServer } from 'node:http';
-import { mkdirSync, readFileSync, existsSync, statSync, rmSync } from 'node:fs';
-import { extname, join, resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { chromium } from 'playwright';
+import { createServer } from "node:http";
+import { mkdirSync, readFileSync, existsSync, statSync, rmSync } from "node:fs";
+import { extname, join, resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { chromium } from "playwright";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const dist = resolve(here, '../dist');
-const base = '/headwater';
-const [out = resolve(here, '../shots'), ...only] = process.argv.slice(2);
-const pages = { start: '/', 'how-it-works': '/how-it-works/', 'how-it-fits': '/how-it-fits/', design: '/design/', roadmap: '/roadmap/' };
+const dist = resolve(here, "../dist");
+const base = "/headwater";
+const [out = resolve(here, "../shots"), ...only] = process.argv.slice(2);
+const pages = {
+  start: "/",
+  "how-it-works": "/how-it-works/",
+  "how-it-fits": "/how-it-fits/",
+  design: "/design/",
+  roadmap: "/roadmap/",
+};
 const widths = [1280, 390];
-const themes = ['dark', 'light'];
+const themes = ["dark", "light"];
 // Points in each diagram's loop, as fractions of it.
 const frames = [0.1, 0.25, 0.4, 0.55, 0.7, 0.85];
 
-const types = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.woff': 'font/woff', '.json': 'application/json' };
+const types = {
+  ".html": "text/html",
+  ".css": "text/css",
+  ".js": "text/javascript",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".woff2": "font/woff2",
+  ".woff": "font/woff",
+  ".json": "application/json",
+};
 const server = createServer((req, res) => {
-  let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  const path = decodeURIComponent(new URL(req.url, "http://x").pathname);
   if (!path.startsWith(base)) return res.writeHead(404).end();
   let file = join(dist, path.slice(base.length));
-  if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');
+  if (existsSync(file) && statSync(file).isDirectory()) file = join(file, "index.html");
   if (!existsSync(file)) return res.writeHead(404).end();
-  res.writeHead(200, { 'content-type': types[extname(file)] || 'application/octet-stream' }).end(readFileSync(file));
+  res
+    .writeHead(200, { "content-type": types[extname(file)] || "application/octet-stream" })
+    .end(readFileSync(file));
 }).listen(0);
 const origin = `http://127.0.0.1:${server.address().port}${base}`;
 
 // A run of every page starts its frames afresh, so none is left from a figure since removed.
-if (!only.length) rmSync(join(out, 'frames'), { recursive: true, force: true });
-mkdirSync(join(out, 'frames'), { recursive: true });
+if (!only.length) rmSync(join(out, "frames"), { recursive: true, force: true });
+mkdirSync(join(out, "frames"), { recursive: true });
 // The full Chromium, which is the one the devenv shell's Nix store holds.
-const browser = await chromium.launch({ channel: 'chromium' });
+const browser = await chromium.launch({ channel: "chromium" });
 try {
   for (const [name, path] of Object.entries(pages)) {
     if (only.length && !only.includes(name)) continue;
@@ -44,18 +61,26 @@ try {
         // The page as a reader who asks for less motion sees it, each diagram
         // at its still frame. Reduced motion is set before the page loads: set
         // after, the still is offset by the time the loop already ran.
-        const ctx = await browser.newContext({ viewport: { width, height: 900 }, colorScheme: theme, deviceScaleFactor: 2, reducedMotion: 'reduce' });
+        const ctx = await browser.newContext({
+          viewport: { width, height: 900 },
+          colorScheme: theme,
+          deviceScaleFactor: 2,
+          reducedMotion: "reduce",
+        });
         const page = await ctx.newPage();
-        await page.goto(origin + path, { waitUntil: 'networkidle' });
+        await page.goto(origin + path, { waitUntil: "networkidle" });
         await page.evaluate(() => document.fonts.ready);
         await page.waitForTimeout(200);
         await page.screenshot({ path: join(out, `${name}-${width}-${theme}.png`), fullPage: true });
-        const figs = await page.locator('figure.hw-figure, figure.hw-canvas').all();
+        const figs = await page.locator("figure.hw-figure, figure.hw-canvas").all();
         for (const [n, fig] of figs.entries()) {
-          if (await fig.isVisible()) await fig.screenshot({ path: join(out, 'frames', `${name}-${n}-${width}-${theme}-still.png`) });
+          if (await fig.isVisible())
+            await fig.screenshot({
+              path: join(out, "frames", `${name}-${n}-${width}-${theme}-still.png`),
+            });
         }
         // Frames of each diagram's loop, wide on the wide page and tall on the phone.
-        await page.emulateMedia({ reducedMotion: 'no-preference' });
+        await page.emulateMedia({ reducedMotion: "no-preference" });
         for (const [n, fig] of figs.entries()) {
           if (!(await fig.isVisible())) continue;
           for (const f of frames) {
@@ -65,10 +90,16 @@ try {
                 a.pause();
                 a.currentTime = f * d;
               }
-              el.dispatchEvent(new CustomEvent('hw:frame', { detail: f }));
+              el.dispatchEvent(new CustomEvent("hw:frame", { detail: f }));
             }, f);
             await page.waitForTimeout(60);
-            await fig.screenshot({ path: join(out, 'frames', `${name}-${n}-${width}-${theme}-${String(Math.round(f * 100)).padStart(2, '0')}.png`) });
+            await fig.screenshot({
+              path: join(
+                out,
+                "frames",
+                `${name}-${n}-${width}-${theme}-${String(Math.round(f * 100)).padStart(2, "0")}.png`,
+              ),
+            });
           }
         }
         await ctx.close();
