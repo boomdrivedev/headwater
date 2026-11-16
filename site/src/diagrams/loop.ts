@@ -19,13 +19,13 @@ export class Loop {
 
   /** Keyframes named k-<name>. */
   kf(name: string, frames: Frame[]): string {
-    const body = frames.map(([p, v]) => `${fmt(p)}%{${v}}`).join('');
+    const body = frames.map(([p, v]) => `${fmt(p)}%{${v}}`).join("");
     this.css.push(`@keyframes k-${name}{${body}}`);
     return `k-${name}`;
   }
 
   /** The class <cls> runs keyframes k-<cls>. */
-  anim(cls: string, frames: Frame[], timing = 'linear'): string {
+  anim(cls: string, frames: Frame[], timing = "linear"): string {
     this.kf(cls, frames);
     this.css.push(`.${cls}{animation:k-${cls} ${this.T}s ${timing} infinite}`);
     return cls;
@@ -36,8 +36,19 @@ export class Loop {
     const E = this.E;
     const fr: Frame[] =
       a <= 0
-        ? [[0, `opacity:${hi}`], [b, `opacity:${hi}`], [b + E, `opacity:${lo}`], [100, `opacity:${lo}`]]
-        : [[0, `opacity:${lo}`], [a - E, `opacity:${lo}`], [a, `opacity:${hi}`], [b, `opacity:${hi}`], [Math.min(b + E, 100), `opacity:${lo}`]];
+        ? [
+            [0, `opacity:${hi}`],
+            [b, `opacity:${hi}`],
+            [b + E, `opacity:${lo}`],
+            [100, `opacity:${lo}`],
+          ]
+        : [
+            [0, `opacity:${lo}`],
+            [a - E, `opacity:${lo}`],
+            [a, `opacity:${hi}`],
+            [b, `opacity:${hi}`],
+            [Math.min(b + E, 100), `opacity:${lo}`],
+          ];
     if (fr[fr.length - 1][0] < 100) fr.push([100, `opacity:${lo}`]);
     return this.anim(cls, fr);
   }
@@ -46,7 +57,7 @@ export class Loop {
    * One property held at each value from its percent until the next, changing
    * over E: points are [percent, value], the first at 0.
    */
-  hold(cls: string, prop: string, points: Array<[number, string]>, timing = 'ease-in-out'): string {
+  hold(cls: string, prop: string, points: Array<[number, string]>, timing = "ease-in-out"): string {
     const fr: Frame[] = [];
     points.forEach(([p, v], i) => {
       fr.push([p, `${prop}:${v}`]);
@@ -61,8 +72,11 @@ export class Loop {
   path(cls: string, points: Array<[number, number, number, number?]>): string {
     return this.anim(
       cls,
-      points.map(([p, x, y, o]) => [p, `transform:translate(${fmt(x)}px,${fmt(y)}px)${o === undefined ? '' : `;opacity:${o}`}`]),
-      'ease-in-out',
+      points.map(([p, x, y, o]) => [
+        p,
+        `transform:translate(${fmt(x)}px,${fmt(y)}px)${o === undefined ? "" : `;opacity:${o}`}`,
+      ]),
+      "ease-in-out",
     );
   }
 
@@ -74,10 +88,10 @@ export class Loop {
    * The style of the whole drawing. The reader who asks for less motion gets
    * the frame at `still` seconds, every caption shown.
    */
-  style(base: string, still: number, stillExtra = ''): string {
+  style(base: string, still: number, stillExtra = ""): string {
     return (
       base +
-      this.css.join('') +
+      this.css.join("") +
       `@media (prefers-reduced-motion:reduce){.root *{animation-play-state:paused!important;animation-delay:-${fmt(still)}s!important}${stillExtra}}`
     );
   }
@@ -86,14 +100,27 @@ export class Loop {
 /** Every class, keyframe and id of one drawing, prefixed with `p`. */
 export function scope(svg: string, p: string): string {
   svg = svg.replace(/<style>([\s\S]*?)<\/style>/, (_, css: string) => {
-    const st = css
-      .replace(/\.(?=[a-zA-Z])/g, `.${p}-`)
-      .replace(/\bk-/g, `${p}-k-`);
+    const st = css.replace(/\.(?=[a-zA-Z])/g, `.${p}-`).replace(/\bk-/g, `${p}-k-`);
     return `<style>${st}</style>`;
   });
-  svg = svg.replace(/class="([^"]*)"/g, (_, c: string) => `class="${c.split(/\s+/).filter(Boolean).map((x) => `${p}-${x}`).join(' ')}"`);
+  svg = svg.replace(
+    /class="([^"]*)"/g,
+    (_, c: string) =>
+      `class="${c
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((x) => `${p}-${x}`)
+        .join(" ")}"`,
+  );
   svg = svg.replace(/\bid="([^"]+)"/g, `id="${p}-$1"`);
-  svg = svg.replace(/aria-labelledby="([^"]+)"/g, (_, ids: string) => `aria-labelledby="${ids.split(' ').map((i) => `${p}-${i}`).join(' ')}"`);
+  svg = svg.replace(
+    /aria-labelledby="([^"]+)"/g,
+    (_, ids: string) =>
+      `aria-labelledby="${ids
+        .split(" ")
+        .map((i) => `${p}-${i}`)
+        .join(" ")}"`,
+  );
   svg = svg.replace(/url\(#([^)]+)\)/g, `url(#${p}-$1)`);
   svg = svg.replace(/href="#([^"]+)"/g, `href="#${p}-$1"`);
   return svg;
@@ -113,4 +140,5 @@ text{font-family:var(--sl-font);fill:var(--d-fg)}
 `;
 
 /** An escaped string for SVG text. */
-export const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+export const esc = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

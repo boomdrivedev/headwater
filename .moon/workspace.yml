@@ -1,5 +1,12 @@
-# moon runs headwater's checks. Each check is tagged with its layer:
-#   check-fast    the site's build: under a minute
+# moon runs headwater's checks: one project for the site, holding its own
+# checks, and the root, holding what spans the tree. Each check is one
+# task, tagged with its layer, which a branch's policy requires by tag
+# (.config/sluice.toml):
+#   check-fast    the site's format, lint, type check and build; the
+#                 root's format. main and every bolt require it
+# No task reads a Markdown file for its words: a page, a README or a record
+# is kept by its writers (boomdrivedev/blueprints principle 16; record
+# 0001).
 # A task whose inputs are identical to a run that passed on this host, in
 # any worktree, replays from .moon/cache/outputs (a link into the git common
 # dir, made by devenv.nix), so every task's inputs name everything it reads.
@@ -7,6 +14,7 @@ $schema: 'https://moonrepo.dev/schemas/workspace.json'
 
 projects:
   site: 'site'
+  root: '.'
 
 # --affected compares against the merge-base with main.
 vcs:
