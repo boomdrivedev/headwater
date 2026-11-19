@@ -1,0 +1,36 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/headwater-core",
+  "crates/headwater-lookups",
+  "crates/headwater",
+  "plugins/boomdrive",
+]
+
+[workspace.package]
+# main gives 0.0.0, the version no release has. A release's tag names the
+# release commit that writes the release's version here and in Cargo.lock
+# (set-version.sh, release-commit.sh), so a build takes its version from
+# the tree alone and the binary says it, as timber's does.
+version = "0.0.0"
+edition = "2021"
+license = "MIT"
+
+[workspace.dependencies]
+clap = { version = "4", features = ["derive"] }
+semver = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+tempfile = "3"
+time = { version = "0.3", features = ["parsing", "formatting", "macros"] }
+toml = "0.9"
+# The family's shared crates, at one revision of weir's main: the capture
+# contract an adapter prints (millpond C.1, C.12) and the conformance pack
+# its lines are held to.
+weir-capture = { git = "https://github.com/boomdrivedev/weir", rev = "4b7bdae2809e0f48e87d3cbad8c59ef8e2b73faf" }
+weir-pack = { git = "https://github.com/boomdrivedev/weir", rev = "4b7bdae2809e0f48e87d3cbad8c59ef8e2b73faf" }
+
+[workspace.lints.clippy]
+too_many_arguments = "allow"
+large_enum_variant = "allow"

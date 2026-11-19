@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "headwater's adapter configuration",
+  "type": "object",
+  "properties": {
+    "repository": {
+      "description": "The checkout whose releases the run captures; the run's working directory where none is named",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,17 @@
+[package]
+name = "headwater-lookups"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "headwater's release lookups: GitHub releases through the asker's own gh sign-in, and timber's channel heads from the host's serving process (statement C.3, C.4)."
+
+[dependencies]
+headwater-core = { path = "../headwater-core" }
+serde_json.workspace = true
+time.workspace = true
+
+[lib]
+doctest = false
+
+[lints]
+workspace = true

@@ -1,0 +1,31 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# The command line, the one binary every surface calls.
+language: 'rust'
+dependsOn: [core, lookups, plugin-boomdrive]
+
+# Each check is one task in the fast layer, run from the workspace root by
+# the toolchain .prototools pins: the crate's layout by rustfmt, its lint by
+# clippy at -D warnings, its types by cargo check over every target, and its
+# tests. No task reads a Markdown file (record 0001).
+tasks:
+  format:
+    command: 'cargo fmt -p headwater --check'
+    inputs: ['/crates/headwater/**/*', '/crates/headwater-core/**/*', '/crates/headwater-lookups/**/*', '/plugins/boomdrive/**/*', '/Cargo.toml', '/rust-toolchain.toml', '/.prototools']
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true}
+  lint:
+    command: 'cargo clippy -p headwater --all-targets -- -D warnings'
+    inputs: ['/crates/headwater/**/*', '/crates/headwater-core/**/*', '/crates/headwater-lookups/**/*', '/plugins/boomdrive/**/*', '/Cargo.toml', '/Cargo.lock', '/rust-toolchain.toml', '/.prototools', '/devenv.nix', '/devenv.lock']
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true}
+  typecheck:
+    command: 'cargo check -p headwater --all-targets'
+    inputs: ['/crates/headwater/**/*', '/crates/headwater-core/**/*', '/crates/headwater-lookups/**/*', '/plugins/boomdrive/**/*', '/Cargo.toml', '/Cargo.lock', '/rust-toolchain.toml', '/.prototools', '/devenv.nix', '/devenv.lock']
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true}
+  test:
+    command: 'cargo test -p headwater'
+    inputs: ['/crates/headwater/**/*', '/crates/headwater-core/**/*', '/crates/headwater-lookups/**/*', '/plugins/boomdrive/**/*', '/Cargo.toml', '/Cargo.lock', '/rust-toolchain.toml', '/.prototools', '/devenv.nix', '/devenv.lock']
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true}

@@ -1,0 +1,17 @@
+{
+  "data": {
+    "r0": {
+      "releases": {
+        "pageInfo": { "hasNextPage": true, "endCursor": "Y3Vyc29yOjI=" },
+        "nodes": [
+          { "tagName": "v0.97.6", "url": "https://github.com/boomdrivedev/sluice/releases/tag/v0.97.6", "publishedAt": "2026-11-19T10:12:00Z", "createdAt": "2026-11-19T10:11:00Z", "isPrerelease": false, "isDraft": false, "description": "## v0.97.6 (2026-11-19)\r\n\r\n### Fixes\r\n\r\n- the key check reads a symlink as moon does\r\n" },
+          { "tagName": "v0.98.0", "url": "https://github.com/boomdrivedev/sluice/releases/tag/untagged-1", "publishedAt": null, "createdAt": "2026-11-19T11:00:00Z", "isPrerelease": false, "isDraft": true, "description": "a draft" }
+        ]
+      }
+    },
+    "r1": null
+  },
+  "errors": [
+    { "type": "NOT_FOUND", "path": ["r1"], "message": "Could not resolve to a Repository with the name 'acme/gone'." }
+  ]
+}

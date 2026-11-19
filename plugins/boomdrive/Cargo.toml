@@ -1,0 +1,21 @@
+[package]
+name = "headwater-boomdrive"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "headwater's Boomdrive plugin: the adapter millpond runs, printing one capture in the family's capture contract for each release newer than a repository's pin (statement section 9; millpond C.1, C.12)."
+
+[dependencies]
+headwater-core = { path = "../../crates/headwater-core" }
+serde_json.workspace = true
+weir-capture.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+weir-pack.workspace = true
+
+[lib]
+doctest = false
+
+[lints]
+workspace = true
