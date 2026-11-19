@@ -6,9 +6,27 @@ tasks:
   # and keeping no cache outside the tree. It reads every tracked file: one
   # that no formatter claims and no exclude names fails it. It excludes
   # *.md and *.mdx by name and reads none (record 0001).
+  # Its key names only files the tree holds as it holds them, as sluice's
+  # check of a candidate's key reads them: moon globs a root task's inputs
+  # on the disk, past .gitignore, so they leave out each path .gitignore
+  # names, as Boomdrive Cloud's root:format does (its fdb4248).
   format:
     command: 'treefmt --ci'
-    inputs: ['/**/*', '/devenv.nix', '/devenv.lock']
+    inputs:
+      - '/**/*'
+      - '/devenv.nix'
+      - '/devenv.lock'
+      - '!/.devenv/**/*'
+      - '!/.devenv.flake.nix'
+      - '!/devenv.local.nix'
+      - '!/.pre-commit-config.yaml'
+      - '!/.moon/cache/**/*'
+      - '!/result'
+      - '!/result/**/*'
+      - '!/site/node_modules/**/*'
+      - '!/site/dist/**/*'
+      - '!/site/.astro/**/*'
+      - '!/target/**/*'
     tags: [check-fast]
     options: {runFromWorkspaceRoot: true}
   # rustc, cargo, clippy and rustfmt are the build .prototools pins, on

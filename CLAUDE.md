@@ -22,6 +22,18 @@ The decisions behind them are `docs/adr/`, one MADR record each,
 proposed until the user's yes. Until the rules are written,
 boomdrivedev/blueprints `design/principles.md` binds.
 
+## Specs
+
+**Specs.** `openspec/specs/` holds headwater's capabilities as built, and
+changes only through an OpenSpec change: a proposal, a delta spec, and
+tasks, validated with `openspec validate --strict` and archived with
+`openspec archive`, so the spec reconciles. This holds for a fix or a
+chore too. Where the work changes a requirement, it carries that change
+in the same branch. Never edit a spec file directly. OpenSpec's skills
+and commands under `.claude/` are tracked as the family's pinned
+OpenSpec writes them (`openspec init --tools claude --profile custom`),
+as timber's are.
+
 ## Checks
 
 Run a repository tool through the shell per command,
