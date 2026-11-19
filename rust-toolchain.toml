@@ -1,0 +1,7 @@
+# The Rust that rustup runs anywhere in this tree: the version .prototools
+# pins, with the tools the gate runs. check-toolchain.sh holds the channel
+# to .prototools.
+[toolchain]
+channel = "1.98.1"
+components = ["clippy", "rustfmt"]
+profile = "minimal"
