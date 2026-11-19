@@ -1,0 +1,26 @@
+{
+  "schema": "sluice/submission@1",
+  "id": 7,
+  "branch": "main",
+  "head": "2a6cb1a029f933a78af900781f4799853604208f",
+  "from": {
+    "agent": "docs/openspec-first-version",
+    "worktree": "pull/4",
+    "head": "docs/openspec-first-version"
+  },
+  "submitted": "2026-11-19T19:02:29Z",
+  "after": [],
+  "priority": 0,
+  "attempt": 2,
+  "state": "landed",
+  "tested": {
+    "combination": "c2439d469acd0e9b0b01982b739f1088417a5417",
+    "on": "a4fe503dbfa2b30a4e764eba8bebb3b92717850f",
+    "submissions": [
+      7
+    ]
+  },
+  "result": "passed",
+  "landed_as": "c8e64a23a3ed2a2d2d2c8083805613fe973cb385",
+  "subject": "docs(openspec): headwater's first version as OpenSpec records it"
+}

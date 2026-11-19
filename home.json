@@ -1,0 +1,13 @@
+{
+  "schema": "sluice/home@1",
+  "at": "origin",
+  "chosen_at": "a4fe503dbfa2b30a4e764eba8bebb3b92717850f",
+  "state": "open",
+  "came_from": {
+    "home": "here",
+    "host": "deneb",
+    "carried": {
+      "6": 6
+    }
+  }
+}

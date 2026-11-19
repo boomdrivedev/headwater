@@ -1,0 +1,37 @@
+{
+  "schema": "sluice/submission@1",
+  "id": 6,
+  "branch": "main",
+  "head": "6469ded681266f4617fcabe179c42599a8bbb322",
+  "from": {
+    "agent": "docs/openspec-first-version",
+    "worktree": "pull/4",
+    "head": "docs/openspec-first-version"
+  },
+  "submitted": "2026-11-19T18:57:34Z",
+  "after": [],
+  "priority": 0,
+  "attempt": 1,
+  "state": "withdrawn",
+  "tested": {
+    "combination": "ef7362670cbefe1ba21c5d8c505411cc346f1765",
+    "on": "a4fe503dbfa2b30a4e764eba8bebb3b92717850f",
+    "submissions": [
+      6
+    ]
+  },
+  "result": "failed",
+  "failed": [
+    {
+      "task": "root:format",
+      "hash": "8b2e1d946bf7dc117ecfcea1add49d4662c95cc62b2f555359f7da79655088c2",
+      "log": "/Users/chuck/.local/share/boomdrive/repositories/boomdrivedev/headwater/headwater.git/sluice-remote/origin/.logs/main/c1/root:format.log",
+      "unsigned": "root:format: .devenv/bootstrap/bootstrapLib.nix is not in the tree"
+    }
+  ],
+  "withdrawn": {
+    "by": "resubmission",
+    "at": "2026-11-19T19:02:29Z"
+  },
+  "subject": "docs(openspec): headwater's first version as OpenSpec records it"
+}
