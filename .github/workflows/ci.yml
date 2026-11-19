@@ -1,0 +1,211 @@
+# headwater on GitHub: the flake builds on macOS and Linux, the fast layer
+# runs in the devenv shell a session uses, and each push to main that
+# git-cliff finds a new version in is released (cliff.toml). headwater's own
+# gate is sluice (.config/sluice.toml); this is the public build.
+#
+# The version lives in the tree. main's names 0.0.0, and a release's tag
+# names a release commit, cut from the pushed commit, that writes the
+# release's version into every file that carries headwater's
+# (release-commit.sh, set-version.sh). The version, binaries and release
+# jobs each make that commit, one id wherever it is made, and the
+# binaries are built from it with nothing given, so a build of the tag,
+# here or anywhere, says the release's version, as timber's do.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: cachix/install-nix-action@v31
+      # main's tree names 0.0.0, the version no release has: the package
+      # and the binary say it, and the binary the commit built.
+      - run: |
+          version="$(nix eval --raw .#default.version)"
+          [ "$version" = 0.0.0 ] || {
+            echo "the package's version is $version, and main's tree names 0.0.0" >&2
+            exit 1
+          }
+          nix build .#default --print-build-logs
+          said="$(./result/bin/headwater --version)"
+          case "$said" in
+          "headwater 0.0.0, revision $(git rev-parse HEAD), built by "*) echo "$said" ;;
+          *)
+            echo "headwater --version says '$said', not 0.0.0 at $(git rev-parse HEAD)" >&2
+            exit 1
+            ;;
+          esac
+
+  fast:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      # On a pull request moon compares the change against its base
+      # branch, `main` by name: it needs the history and the branch.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - if: github.event_name == 'pull_request'
+        run: git branch main origin/main
+      - uses: cachix/install-nix-action@v31
+      - uses: cachix/cachix-action@v16
+        with:
+          name: devenv
+      - run: nix profile add nixpkgs#devenv
+      - uses: actions/cache@v4
+        with:
+          path: |
+            target
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: fast-${{ runner.os }}-${{ hashFiles('Cargo.lock', '.prototools') }}
+          restore-keys: fast-${{ runner.os }}-
+      - run: devenv shell -- moon run ':#check-fast'
+
+  # The commits since the last release are conventional (.versionrc): a
+  # session can skip the commit-msg hook, and git-cliff releases from them.
+  # Merge commits are not checked. The last release is the newest v* tag
+  # by version, which names a release commit off main's history whose
+  # parent is the commit it released, so the range is what main took since.
+  conventional:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: cachix/install-nix-action@v31
+      - run: |
+          last="$(git tag --list 'v*' --sort=-v:refname | head -n 1)"
+          nix shell --inputs-from . nixpkgs#convco -c convco check ${last:+"$last..HEAD"}
+
+  # The next version from the commits since the newest v* tag, whose range
+  # `--unreleased` starts at that tag, off main's history; empty when it is
+  # already tagged. Where it is new, the release commit of it, whose id
+  # the binaries and release jobs make again and hold theirs to.
+  version:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.next.outputs.tag }}
+      commit: ${{ steps.next.outputs.commit }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: cachix/install-nix-action@v31
+      - id: next
+        run: |
+          tag="$(nix shell --inputs-from . nixpkgs#git-cliff -c git-cliff --unreleased --bumped-version)"
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "$tag is already released"
+          else
+            sh release-commit.sh "${tag#v}"
+            echo "tag=$tag" >> "$GITHUB_OUTPUT"
+            echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          fi
+
+  # The binary for each platform, built from the tree the release commit
+  # holds, the pushed commit with the release's version written, so it
+  # says that version and names the commit the tag names.
+  binaries:
+    if: needs.version.outputs.tag != ''
+    needs: [version, build, fast, conventional]
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            system: x86_64-linux
+          - os: ubuntu-24.04-arm
+            system: aarch64-linux
+          - os: macos-latest
+            system: aarch64-darwin
+    runs-on: ${{ matrix.os }}
+    env:
+      TAG: ${{ needs.version.outputs.tag }}
+      COMMIT: ${{ needs.version.outputs.commit }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: cachix/install-nix-action@v31
+      # The release commit, made again on the pushed commit: the version
+      # job's or nothing. Its tree gives the release's version, which the
+      # package takes from it.
+      - run: |
+          sh release-commit.sh "${TAG#v}"
+          made="$(git rev-parse HEAD)"
+          [ "$made" = "$COMMIT" ] || {
+            echo "the release commit made here is $made, and the version job's $COMMIT" >&2
+            exit 1
+          }
+          version="$(nix eval --raw .#default.version)"
+          [ "$version" = "${TAG#v}" ] || {
+            echo "the package's version is $version, and the release's ${TAG#v}" >&2
+            exit 1
+          }
+      # Built from the release commit's tree with nothing given.
+      - run: nix build .#default --print-build-logs
+      - run: |
+          said="$(./result/bin/headwater --version)"
+          case "$said" in
+          "headwater ${TAG#v}, revision $COMMIT, built by "*) echo "$said" ;;
+          *)
+            echo "headwater --version says '$said', not ${TAG#v} at $COMMIT" >&2
+            exit 1
+            ;;
+          esac
+      - run: tar -czf "headwater-${{ matrix.system }}.tar.gz" -C result/bin headwater
+      - uses: actions/upload-artifact@v4
+        with:
+          name: headwater-${{ matrix.system }}
+          path: headwater-${{ matrix.system }}.tar.gz
+
+  # git-cliff's notes for the range, main's, taken before the release
+  # commit; then the release commit, made again and held to the version
+  # job's, which the tag names. It pushes the tag alone and publishes the
+  # binaries under it. Nothing is committed to main, which only sluice
+  # lands, no branch is pushed and no tag is moved.
+  release:
+    needs: [version, binaries]
+    runs-on: ubuntu-latest
+    concurrency: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: cachix/install-nix-action@v31
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - run: |
+          nix shell --inputs-from . nixpkgs#git-cliff -c \
+            git-cliff --unreleased --tag "$TAG" --strip all > notes.md
+          sh release-commit.sh "${TAG#v}"
+          made="$(git rev-parse HEAD)"
+          [ "$made" = "$COMMIT" ] || {
+            echo "the release commit made here is $made, and the version job's $COMMIT" >&2
+            exit 1
+          }
+          git tag "$TAG"
+          git push origin "refs/tags/$TAG"
+          gh release create "$TAG" --verify-tag --title "$TAG" \
+            --notes-file notes.md headwater-*.tar.gz
+        env:
+          TAG: ${{ needs.version.outputs.tag }}
+          COMMIT: ${{ needs.version.outputs.commit }}
+          GH_TOKEN: ${{ github.token }}

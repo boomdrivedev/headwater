@@ -11,3 +11,27 @@ tasks:
     inputs: ['/**/*', '/devenv.nix', '/devenv.lock']
     tags: [check-fast]
     options: {runFromWorkspaceRoot: true}
+  # rustc, cargo, clippy and rustfmt are the build .prototools pins, on
+  # whichever host runs the gate (check-toolchain.sh). It reads the tools
+  # it checks from outside the tree, so it never replays.
+  toolchain:
+    command: 'sh check-toolchain.sh'
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true, cache: false}
+  # Every file that carries headwater's version gives the workspace's,
+  # 0.0.0 on main, and set-version.sh, run on a scratch copy, writes a
+  # release's version into each and changes nothing else
+  # (check-versions.sh).
+  versions:
+    command: 'sh check-versions.sh'
+    inputs: ['/Cargo.toml', '/Cargo.lock', '/set-version.sh', '/check-versions.sh', '/devenv.nix', '/devenv.lock']
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true}
+  # A release's tag names the release commit release-commit.sh makes, one
+  # id wherever it runs, proved in scratch repositories; and a build takes
+  # headwater's version from its tree alone (check-release.sh).
+  release:
+    command: 'sh check-release.sh'
+    inputs: ['/set-version.sh', '/release-commit.sh', '/check-release.sh', '/Cargo.toml', '/Cargo.lock', '/.github/workflows/ci.yml', '/flake.nix', '/devenv.nix', '/devenv.lock']
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true}
