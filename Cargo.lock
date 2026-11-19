@@ -472,7 +472,7 @@ dependencies = [
 
 [[package]]
 name = "headwater"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "clap",
  "headwater-boomdrive",
@@ -486,7 +486,7 @@ dependencies = [
 
 [[package]]
 name = "headwater-boomdrive"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "headwater-core",
  "serde_json",
@@ -497,7 +497,7 @@ dependencies = [
 
 [[package]]
 name = "headwater-core"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "semver",
  "serde",
@@ -510,7 +510,7 @@ dependencies = [
 
 [[package]]
 name = "headwater-lookups"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "headwater-core",
  "serde_json",
