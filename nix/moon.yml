@@ -1,0 +1,22 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# The flake: flake.nix and flake.lock at the root, which export headwater's
+# package for a host's or Boomdrive's flake to pin. Its format is
+# root:format's, whose nixfmt and deadnix read flake.nix. Its build is CI's
+# (.github/workflows/ci.yml), which the gate's sandbox, holding no network,
+# cannot run; root:release holds the package's version to the tree's.
+language: 'nix'
+
+tasks:
+  # statix over the flake.
+  lint:
+    command: 'statix check flake.nix'
+    inputs: ['/flake.nix', '/devenv.nix', '/devenv.lock']
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true}
+  # The flake parses, and its lock names every input it declares.
+  typecheck:
+    command: 'sh nix/check.sh'
+    inputs: ['/flake.nix', '/flake.lock', '/nix/check.sh', '/devenv.nix', '/devenv.lock']
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true}
