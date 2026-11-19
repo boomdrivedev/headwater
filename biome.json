@@ -9,6 +9,7 @@
     "includes": [
       "biome.json",
       "site/**",
+      "plugins/**/*.json",
       "!site/node_modules",
       "!site/dist",
       "!site/.astro",

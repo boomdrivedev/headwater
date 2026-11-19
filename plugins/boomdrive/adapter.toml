@@ -1,0 +1,9 @@
+# headwater's adapter, as millpond and Boomdrive declare one (millpond C.1,
+# C.12): the command a run starts, with `--raw-dir <dir>` and, where one is
+# kept, `--cursor <c>` after it; the schema of the configuration in the
+# file CAPTURE_CONFIG names; and the secrets it needs, none: the lookups
+# use the asker's own sign-ins (headwater 38).
+[adapter.headwater]
+command = ["headwater", "capture"]
+config = "config.schema.json"
+secrets = []

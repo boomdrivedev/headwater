@@ -1,0 +1,13 @@
+{
+  "data": {
+    "r0": {
+      "releases": {
+        "pageInfo": { "hasNextPage": false, "endCursor": "Y3Vyc29yOjM=" },
+        "nodes": [
+          { "tagName": "v0.97.5-rc.1", "url": "https://github.com/boomdrivedev/sluice/releases/tag/v0.97.5-rc.1", "publishedAt": "2026-11-18T09:00:00Z", "createdAt": "2026-11-18T09:00:00Z", "isPrerelease": true, "isDraft": false, "description": "" },
+          { "tagName": "nightly", "url": "https://github.com/boomdrivedev/sluice/releases/tag/nightly", "publishedAt": "2026-11-17T09:00:00Z", "createdAt": "2026-11-17T09:00:00Z", "isPrerelease": true, "isDraft": false, "description": "nightly" }
+        ]
+      }
+    }
+  }
+}

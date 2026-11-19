@@ -1,0 +1,46 @@
+{
+  "answer": "ok",
+  "value": {
+    "asked_at": 1795098290,
+    "branch": "main",
+    "channels": {
+      "answer": "ok",
+      "value": {
+        "channels": [
+          {
+            "at": { "answer": "ok", "value": { "read": "source", "state": "empty" } },
+            "channel": { "component": null, "name": "beta" },
+            "moves": { "by": "each_publish", "prereleases": false },
+            "notes": []
+          },
+          {
+            "at": {
+              "answer": "ok",
+              "value": {
+                "read": "source",
+                "state": "at",
+                "head": {
+                  "channel": "stable",
+                  "component": "sluice",
+                  "to": { "version": "0.22.0", "index": "sha256:5b1f" },
+                  "from": { "version": "0.21.2", "index": "sha256:0a2e" },
+                  "predecessor": null,
+                  "asked_by": "chuck",
+                  "policy": { "revision": "c02c62d9", "satisfied_by": [] },
+                  "at": 1795000000
+                },
+                "chain": []
+              }
+            },
+            "channel": { "component": null, "name": "stable" },
+            "moves": { "by": "promotion", "prereleases": false },
+            "notes": [
+              { "version": "0.22.0", "index": "sha256:5b1f", "notes": { "answer": "ok", "value": "## v0.22.0\n\n### Features\n\n- the channel moves\n" } }
+            ]
+          }
+        ]
+      }
+    },
+    "environments": { "answer": "ok", "value": { "environments": [] } }
+  }
+}

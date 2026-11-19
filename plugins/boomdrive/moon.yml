@@ -1,0 +1,32 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# The Boomdrive plugin: the adapter's captures, held to the family's
+# conformance pack (weir-pack).
+language: 'rust'
+dependsOn: [core]
+
+# Each check is one task in the fast layer, run from the workspace root by
+# the toolchain .prototools pins: the crate's layout by rustfmt, its lint by
+# clippy at -D warnings, its types by cargo check over every target, and its
+# tests. No task reads a Markdown file (record 0001).
+tasks:
+  format:
+    command: 'cargo fmt -p headwater-boomdrive --check'
+    inputs: ['/plugins/boomdrive/**/*', '/crates/headwater-core/**/*', '/Cargo.toml', '/rust-toolchain.toml', '/.prototools']
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true}
+  lint:
+    command: 'cargo clippy -p headwater-boomdrive --all-targets -- -D warnings'
+    inputs: ['/plugins/boomdrive/**/*', '/crates/headwater-core/**/*', '/Cargo.toml', '/Cargo.lock', '/rust-toolchain.toml', '/.prototools', '/devenv.nix', '/devenv.lock']
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true}
+  typecheck:
+    command: 'cargo check -p headwater-boomdrive --all-targets'
+    inputs: ['/plugins/boomdrive/**/*', '/crates/headwater-core/**/*', '/Cargo.toml', '/Cargo.lock', '/rust-toolchain.toml', '/.prototools', '/devenv.nix', '/devenv.lock']
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true}
+  test:
+    command: 'cargo test -p headwater-boomdrive'
+    inputs: ['/plugins/boomdrive/**/*', '/crates/headwater-core/**/*', '/Cargo.toml', '/Cargo.lock', '/rust-toolchain.toml', '/.prototools', '/devenv.nix', '/devenv.lock']
+    tags: [check-fast]
+    options: {runFromWorkspaceRoot: true}

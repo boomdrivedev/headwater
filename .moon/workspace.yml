@@ -1,9 +1,13 @@
-# moon runs headwater's checks: one project for the site, holding its own
-# checks, and the root, holding what spans the tree. Each check is one
-# task, tagged with its layer, which a branch's policy requires by tag
+# moon runs headwater's checks: one project per crate, for the Boomdrive
+# plugin, for the flake and for the site, each holding its own checks, and
+# the root, holding what spans the tree. Each check is one task, tagged
+# with its layer, which a branch's policy requires by tag
 # (.config/sluice.toml):
-#   check-fast    the site's format, lint, type check and build; the
-#                 root's format. main and every bolt require it
+#   check-fast    each crate's format, lint, type check and tests against
+#                 recorded lookups; the flake's lint and type check; the
+#                 site's format, lint, type check and build; the root's
+#                 format, toolchain, versions and release. main and every
+#                 bolt require it
 # No task reads a Markdown file for its words: a page, a README or a record
 # is kept by its writers (boomdrivedev/blueprints principle 16; record
 # 0001).
@@ -13,6 +17,11 @@
 $schema: 'https://moonrepo.dev/schemas/workspace.json'
 
 projects:
+  core: 'crates/headwater-core'
+  lookups: 'crates/headwater-lookups'
+  cli: 'crates/headwater'
+  plugin-boomdrive: 'plugins/boomdrive'
+  nix: 'nix'
   site: 'site'
   root: '.'
 

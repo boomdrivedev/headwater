@@ -53,15 +53,30 @@ let
     ${protoHome}
     eval "$(${proto}/bin/proto activate bash --export --no-bin --config-mode upwards 2>/dev/null)"
   '';
+
+  # treefmt's rustfmt: the pinned toolchain's.
+  rustfmt = pkgs.writeShellApplication {
+    name = "rustfmt";
+    text = ''
+      ${activate}
+      exec rustfmt "$@"
+    '';
+  };
 in
 {
-  # The system tools are this file's, pinned by devenv.lock; moon is
-  # .prototools', installed by the headwater:proto:install task on entering
-  # the shell and activated by enterShell.
+  # The system tools are this file's, pinned by devenv.lock; moon and Rust
+  # are .prototools', installed by the headwater:proto:install task on
+  # entering the shell and activated by enterShell.
   packages = [
     pkgs.git
     pkgs.jq
     proto
+    # The release's notes and next version, from the conventional commits
+    # (cliff.toml; .github/workflows/ci.yml).
+    pkgs.git-cliff
+    # The nix project's lint and type check (nix/moon.yml).
+    pkgs.statix
+    pkgs.nix
     # The site (site/): bun builds it, Biome formats and lints its sources
     # (site:format, site:lint, and treefmt for root:format), and Playwright
     # drives the headless Chromium its screenshots are taken in
@@ -95,14 +110,24 @@ in
   '';
 
   # The tool versions .prototools lists, installed before enterShell
-  # activates them. A task, not part of enterShell, so a script that only
-  # sources the shell's environment never installs.
+  # activates them and before treefmt formats with their rustfmt. Rust is
+  # rustup's first, with the profile and components rust-toolchain.toml
+  # names, as timber's is: proto makes the toolchain's directory before its
+  # Rust plugin asks `rustup toolchain list`, and would otherwise find an
+  # empty toolchain listed and install nothing. A task, not part of
+  # enterShell, so a script that only sources the shell's environment never
+  # installs.
   tasks."headwater:proto:install" = {
     exec = ''
+      cd "$(${lib.getExe pkgs.git} rev-parse --show-toplevel)"
+      ${pkgs.rustup}/bin/rustup toolchain install
       ${protoHome}
       ${proto}/bin/proto install --config-mode upwards
     '';
-    before = [ "devenv:enterShell" ];
+    before = [
+      "devenv:enterShell"
+      "devenv:treefmt:run"
+    ];
   };
 
   # Every formatter treefmt.nix configures, which root:format checks.
@@ -110,6 +135,7 @@ in
   treefmt.config = {
     imports = [ ./treefmt.nix ];
     projectRootFile = "devenv.nix";
+    programs.rustfmt.package = rustfmt;
   };
 
   # convco refuses a commit message that is not a conventional commit
@@ -131,6 +157,16 @@ in
       ${lib.getExe config.git-hooks.package} install --force -t commit-msg
     fi
   '';
+
+  # What CI would release from here: the next version and its notes.
+  scripts.release-preview = {
+    description = "The next release's version and notes: git cliff --unreleased --bump";
+    exec = ''
+      set -euo pipefail
+      cd "$(git rev-parse --show-toplevel)"
+      git cliff --unreleased --bump --strip all "$@"
+    '';
+  };
 
   # `devenv shell -- site-dev`: the site at http://localhost:4321/headwater/.
   scripts.site-dev = {

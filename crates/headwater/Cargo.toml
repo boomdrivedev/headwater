@@ -1,0 +1,29 @@
+[package]
+name = "headwater"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Reports every release newer than what a repository pins, with upstream's notes and how big a step it is."
+build = "build.rs"
+
+[[bin]]
+name = "headwater"
+path = "src/main.rs"
+
+[dependencies]
+headwater-core = { path = "../headwater-core" }
+headwater-lookups = { path = "../headwater-lookups" }
+headwater-boomdrive = { path = "../../plugins/boomdrive" }
+clap.workspace = true
+serde_json.workspace = true
+time.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+weir-pack.workspace = true
+
+[lib]
+doctest = false
+
+[lints]
+workspace = true

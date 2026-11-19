@@ -23,7 +23,10 @@
     # frontmatter, and only experimentally; astro check reads them
     # (site:typecheck).
     "site/**/*.astro"
+    # A lookup's recorded answers, kept byte for byte as it gave them.
+    "crates/headwater-lookups/tests/answers/**"
     # Build outputs and caches.
+    "target/**"
     ".devenv/**"
     ".moon/cache/**"
     "site/node_modules/**"
@@ -31,12 +34,25 @@
     "site/.astro/**"
   ];
 
+  # Rust, by the pinned toolchain's rustfmt (devenv.nix).
+  programs.rustfmt.enable = true;
+  programs.rustfmt.edition = "2021";
+
   programs.deadnix.enable = true;
   programs.nixfmt.enable = true;
   settings.formatter.deadnix.pipeline = "nix";
   settings.formatter.deadnix.priority = 1;
   settings.formatter.nixfmt.pipeline = "nix";
   settings.formatter.nixfmt.priority = 2;
+
+  # The release's and the checks' scripts.
+  programs.shellcheck.enable = true;
+  programs.shfmt.enable = true;
+  programs.shfmt.indent_size = 2;
+  settings.formatter.shellcheck.pipeline = "shell";
+  settings.formatter.shellcheck.priority = 1;
+  settings.formatter.shfmt.pipeline = "shell";
+  settings.formatter.shfmt.priority = 2;
 
   # Biome lays out the site's TypeScript, JavaScript, CSS and JSON by the
   # settings biome.json holds, the ones site:format checks and site:lint
@@ -57,6 +73,8 @@
       "site/*.mjs"
       "site/*.css"
       "site/*.json"
+      # The Boomdrive plugin's configuration schema.
+      "plugins/*.json"
     ];
   };
 
