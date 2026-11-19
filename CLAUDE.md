@@ -6,7 +6,12 @@ invariants in boomdrivedev/blueprints, `design/headwater/requirements.md`;
 this repository cites its clauses by number and never restates them. The
 design book is at https://boomdrivedev.github.io/blueprints/headwater/.
 
-Nothing is built yet. The order of work is steps H1 to H7 of
+A first version is built: the core (`crates/headwater-core`), the GitHub
+and timber release lookups (`crates/headwater-lookups`), the command line
+(`crates/headwater`) and the Boomdrive plugin's adapter
+(`plugins/boomdrive`). It reads one dependency description, the Nix flake
+(C.2), keeps no held state, binds no advisory lookup, and scans every tier
+on each run. The order of the rest is steps H4 to H7 of
 `design/capture/plan.md` in boomdrivedev/blueprints.
 
 ## Rules
@@ -26,7 +31,7 @@ each branch requires, and `main` lands only through sluice:
 
 | layer | what | who requires it |
 |---|---|---|
-| `check-fast` | the site's format and lint (Biome), type check (astro check) and build; the root's format (treefmt) | `main` and every bolt |
+| `check-fast` | each crate's format, lint (clippy), type check and tests against recorded lookups; the flake's lint and type check; the site's format and lint (Biome), type check (astro check) and build; the root's format (treefmt), toolchain, versions and release | `main` and every bolt |
 
 `devenv shell -- moon run ':#check-fast'` runs the fast layer, and
 `moon run <project>:<task>` one check: the projects are `site` (`site/`)
@@ -39,6 +44,15 @@ its words (principle 16; record 0001).
 `site/` is the Starlight site at https://boomdrivedev.github.io/headwater,
 published by `.github/workflows/pages.yml`. `site/README.md` says where
 its pages and diagrams live.
+
+## Releases
+
+main's tree names 0.0.0. On each push to main that git-cliff finds a new
+version in (`cliff.toml`), CI makes the release commit that writes the
+version (`release-commit.sh`, `set-version.sh`), builds the flake's package
+from it for each platform, tags it and publishes the binaries
+(`.github/workflows/ci.yml`), as timber's does. `devenv shell --
+release-preview` shows what would be released.
 
 ## Commits
 

@@ -9,9 +9,18 @@ the pin moves and the release leaves the report. headwater never changes the
 repository and never acts on a release. A person or an agent decides, and the
 change is theirs.
 
-> **Status: designed, not built.** The design is settled in a statement of
-> invariants; no code exists yet. The [roadmap](https://agentplot.github.io/headwater/roadmap/)
+> **Status: a first version.** It reads a Nix flake's inputs, asks GitHub's
+> releases or a timber channel for each, and reports every newer release with
+> its level and notes; its Boomdrive plugin prints one capture per release.
+> The other declarations, lookups, tiers' cadence, advisories and the held
+> state are still to build. The [roadmap](https://agentplot.github.io/headwater/roadmap/)
 > orders the work.
+
+```sh
+headwater scan --repo ~/Code/boomdrive        # for a person
+headwater scan --json                          # the one form a program reads
+headwater capture --raw-dir "$(mktemp -d)"     # millpond's adapter: capture lines
+```
 
 ## What it does
 
