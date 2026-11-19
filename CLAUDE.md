@@ -15,8 +15,7 @@ headwater's rules are written at plan step H2, into `docs/architecture/`
 with `core.md` binding wherever a change is made, and then imported here.
 The decisions behind them are `docs/adr/`, one MADR record each,
 proposed until the user's yes. Until the rules are written,
-boomdrivedev/blueprints `design/principles.md` binds, and the kit
-standard as its `code` profile says (`.config/kit.toml`).
+boomdrivedev/blueprints `design/principles.md` binds.
 
 ## Checks
 
